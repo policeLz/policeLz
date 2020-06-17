@@ -7,14 +7,20 @@
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
     <link rel="stylesheet" href="//api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
-    <link rel="stylesheet" href="//api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.css" />
+    <link rel="stylesheet" href="./js/library/SearchInfoWindow.css" /> 
+    <link rel="stylesheet" href="./js/library/TrafficControl.css" /> 
     <script  type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=E3sYktwojudqv4i8xvCKF5xRF1nhCr5q&s=1" ></script>
-    <script type="text/javascript" src="//api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+    <script type="text/javascript" src="./js/library/DrawingManager.js"></script>
     
     <!--加载检索信息窗口-->
-    <script type="text/javascript" src="//api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
-    <script type="text/javascript" src="./js/mapv.js"></script>
-    <script type="text/javascript" src="./js/geoUtils.js"></script>
+    <script type="text/javascript" src="./js/library/SearchInfoWindow.js"></script>
+    <script type="text/javascript" src="./js/library/mapv.js"></script>
+    <!--几何运算 包括计算面积，判断点位是否在区域内-->
+    <script type="text/javascript" src="./js/library/BMapLib_GeoUtils.js"></script>
+    <!--路况-->
+    <script type="text/javascript" src="./js/library/TrafficControl.js"></script>
+    <!--热力图-->
+    <script type="text/javascript" src="./js/library/HeatMap.js"></script>
   </head>
   <body>
     <noscript>

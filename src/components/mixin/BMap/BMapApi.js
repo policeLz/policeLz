@@ -30,31 +30,67 @@ export const BMapMixin = {
         map.enableScrollWheelZoom(true)
     },
     methods: {
-        getDistance(pointA, pointB, callback) {//测距   单位（米）
+        getDistance(pointA, pointB) {//测距   单位（米）
             //获取两点间距离
             let _this = this, map = _this.myBMap;
-            _this.addOverlay(pointA,pointB)
-            map.centerAndZoom(new BMap.Point(pointA.lon, pointA.lat),14)
+            _this.addOverlay(pointA, pointB)
+            map.centerAndZoom(new BMap.Point(pointA.lon, pointA.lat), 14)
             var pointA = new BMap.Point(pointA.lon, pointA.lat);
             var pointB = new BMap.Point(pointB.lon, pointB.lat);
             alert('距离是：' + (map.getDistance(pointA, pointB)).toFixed(2) + ' 米。');  //获取两点距离,保留小数点后两位
-            //callback((map.getDistance(pointA, pointB)).toFixed(2))
-            
+            var distance = map.getDistance(pointA, pointB).toFixed(2)
+            //callback(distance)
+
         },
-        addOverlay(pointA, pointB) {//画直线
+        addOverlay(pointA, pointB, callback) {//画直线
             let _this = this, map = _this.myBMap;
             var pointA = new BMap.Point(pointA.lon, pointA.lat);
             var pointB = new BMap.Point(pointB.lon, pointB.lat);
             var polyline = new BMap.Polyline([pointA, pointB], { strokeColor: "blue", strokeWeight: 6, strokeOpacity: 0.5 });  //定义折线
             map.addOverlay(polyline);     //添加折线到地图上
             _this.overlays.push(polyline)
+            callback()
         },
         clearAll() {//清楚绘制的痕迹
             let _this = this, map = _this.myBMap;
-            for (var i = 0; i < _this.overlays.length; i++) {
-                map.removeOverlay(_this.overlays[i]);
-            }
-            _this.overlays.length = 0
+            // for (var i = 0; i < _this.overlays.length; i++) {
+            //     map.removeOverlay(_this.overlays[i]);
+            // }
+            // _this.overlays.length = 0
+            map.clearOverlays()
+        },
+        //画线
+        drawLine() {
+            this.drawGraphical('POLYLINE', function (path) {
+                console.log(path)
+                let pathArr = [];
+                path.forEach(item => {
+                    pathArr.push(
+                        [item.lat, item.lng]
+                    )
+                })
+                alert(JSON.stringify(pathArr))
+            })
+        },
+        //打点
+        drawPoint() {
+            this.drawGraphical('MARKER', function (point) {
+                alert("坐标是" + point.lng + ',' + point.lat)
+            })
+        },
+        //画圆框选
+        drawCircle() {
+            this.drawGraphical('CIRCLE', function (path, radius, center) {
+                console.log(radis, center)
+                alert("半径是" + radius, "中心点坐标：" + center.lat)
+            })
+        },
+        //画多边形
+        drawPolygon(){
+            this.drawGraphical('POLYGON', function (path, radius, center) {
+                // console.log(radis, center)
+                // alert("半径是" + radius, "中心点坐标：" + center.lat)
+            })
         },
         //画图形
         //@params type : 'MARKER' 点 'POLYLINE'线  'CIRCLE'圆 'RECTANGLE'矩形  'POLYGON'多边形
@@ -71,17 +107,28 @@ export const BMapMixin = {
                     e.overlay.enableEditing();
                     drawingManager.close();
                 }
-                e.overlay.addEventListener('lineupdate', function() {
+                e.overlay.addEventListener('lineupdate', function () {
                     console.log('圆更新' + '半径' + e.overlay.getRadius());
                     console.log(e.overlay.getCenter());
+                    console.log(e.overlay.getPath())
+
                 });
                 _this.overlays.push(e.overlay);
-                var drawPath = e.overlay.getPath();
+                console.log(e.overlay)
+                //var drawPath = e.overlay.getPath();
                 // drawPath.forEach(item=>{
                 //     console.log(item.lat)
                 //     console.log(item.lng)
                 // })
-                callback(drawPath,drawingManager)
+                if (type = "MARKER") {
+                    drawingManager.close()
+                    console.log(e.overlay.point)
+                    callback(e.overlay.point)
+                } else if (e.overlay instanceof BMap.Circle) {
+                    callback(e.overlay.getRadius(), e.overlay.getCenter())
+                } else {
+                    callback(drawPath)
+                }
             };
             var styleOptions = {
                 strokeColor: "red",    //边线颜色。
@@ -111,12 +158,14 @@ export const BMapMixin = {
             // drawingManager.setDrawingMode(_this.BMAP_DRAWING.POLYLINE);
             drawingManager.open()
         },
-        drawMarker() {//标记点  并弹框
+
+        drawMarker(lng, lat) {//标记点  并弹框
             let _this = this, map = _this.myBMap;
-            var pt = new BMap.Point(120.3054566, 31.570037);
+            var pt = new BMap.Point(lng, lat);
             var myIcon = new BMap.Icon(require("../../../assets/image/logo.png"), new BMap.Size(44, 46));
             var marker = new BMap.Marker(pt, { icon: myIcon });  // 创建标注
             map.addOverlay(marker);              // 将标注添加到地图中
+            map.centerAndZoom(new BMap.Point(lng, lat), 14)
             _this.overlays.push(marker)
             var sContent =
                 "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>天安门</h4>" +
@@ -147,10 +196,10 @@ export const BMapMixin = {
             _this.run = function () {
                 var driving = new BMap.DrivingRoute(map);    //驾车实例
                 driving.search(myP1, myP2);
-               // _this.overlays.push(driving.getResults().getPlan(0).getRoute(0).marker)
+                // _this.overlays.push(driving.getResults().getPlan(0).getRoute(0).marker)
                 driving.setSearchCompleteCallback(function (routes) {
-                    
-                    
+
+
 
                     var pts = driving.getResults().getPlan(0).getRoute(0).getPath();    //通过驾车实例，获得一系列点的数组
                     var paths = pts.length;    //获得有几个点
@@ -208,11 +257,8 @@ export const BMapMixin = {
         aggregationPoints() {
             let _this = this, map = _this.myBMap;
             var randomCount = 200000;
-
             var data = [];
-
             var citys = ["北京", "天津", "上海", "重庆", "石家庄", "太原", "呼和浩特", "哈尔滨", "长春", "沈阳", "济南", "南京", "合肥", "杭州", "南昌", "福州", "郑州", "武汉", "长沙", "广州", "南宁", "西安", "银川", "兰州", "西宁", "乌鲁木齐", "成都", "贵阳", "昆明", "拉萨", "海口"];
-
             // 构造数据
             while (randomCount--) {
                 var cityCenter = mapv.utilCityCenter.getCenterByCityName(citys[parseInt(Math.random() * citys.length)]);
@@ -224,8 +270,9 @@ export const BMapMixin = {
                     }
                 });
             }
-            
+
             var dataSet = new mapv.DataSet(data);
+            console.log(dataSet)
             var img = new Image();
             img.src = require("../../../assets/image/logo.png");
             img.onload = function () {
@@ -276,8 +323,79 @@ export const BMapMixin = {
                 }
                 var mapvLayer = new mapv.baiduMapLayer(map, dataSet, options);
             }
-        }
+        },
+        //导航基础功能
+        nagivate() {
+            let _this = this, map = _this.myBMap;
+            var driving = new BMap.DrivingRoute(map, {
+                renderOptions: {
+                    map: map
+                }
+            });
+            driving.search('三阳广场', '无锡市公安局');
+        },
+        //开启路况
+        trafficOn(){
+            let _this = this, map = _this.myBMap;
+           
+            var ctrl = new BMapLib.TrafficControl();      
+            //map.addControl(ctrl);
+            //ctrl.setAnchor(BMAP_ANCHOR_BOTTOM_RIGHT);
+            map.addControl(ctrl);
+            ctrl.showTraffic()
+            ctrl.showTraffic({predictDate:{hour:17, weekday: 1}})
+            //{weekday:预测日期，取值1到7，表示周一到周日 ,hour: 预测小时数，取值0到23，表示当日的0点到23点} 表示交通流量的预测日期
+        },
+       
+        //显示热力图
+        showHeatMap(){
+            let _this = this, map = _this.myBMap;
+          
+            var points = [];
+            for(let i =0;i<=500;i++){
+               let pointItem = {"lng":(Math.ceil(Math.random())*100000+120205456)/1000000,"lat":(Math.ceil(Math.random()*100000)+31570037)/1000000,count :Math.ceil(Math.random()*50)} 
+               points.push(pointItem)
+            }
+            console.log(points)
+            if(!isSupportCanvas()){
+                alert('热力图目前只支持有canvas支持的浏览器,您所使用的浏览器不能使用热力图功能~')
+            }
+            var heatmapOverlay = new BMapLib.HeatmapOverlay({"radius":20});
+            map.addOverlay(heatmapOverlay);
+            heatmapOverlay.setDataSet({data:points,max:100});
+            //是否显示热力图
+            function openHeatmap(){
+                heatmapOverlay.show();
+            }
+            function closeHeatmap(){
+                heatmapOverlay.hide();
+            }
+            openHeatmap();
+            // function setGradient(){
+            //     /*格式如下所示:
+            //     {
+            //         0:'rgb(102, 255, 0)',
+            //         .5:'rgb(255, 170, 0)',
+            //         1:'rgb(255, 0, 0)'
+            //     }*/
+            //     var gradient = {};
+            //     var colors = document.querySelectorAll("input[type='color']");
+            //     colors = [].slice.call(colors,0);
+            //     colors.forEach(function(ele){
+            //         gradient[ele.getAttribute("data-key")] = ele.value; 
+            //     });
+            //     heatmapOverlay.setOptions({"gradient":gradient});
+            // }
+            //判断浏览区是否支持canvas
+            function isSupportCanvas(){
+                var elem = document.createElement('canvas');
+                return !!(elem.getContext && elem.getContext('2d'));
+            }
+        },
+        //关闭热力图
+        hideHeatMao(){
 
+        },
 
     },
 

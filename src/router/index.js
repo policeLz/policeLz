@@ -16,6 +16,13 @@ export default new Router({
             name: 'BMap',
             component: () =>
                 import ('@/views/BMap/index.vue')
+        },
+        // 管理系统首页
+        {
+            path: '/manager',
+            name: 'manager',
+            component: () =>
+                import ('@/views/manager/index.vue')
         }
     ]
 }

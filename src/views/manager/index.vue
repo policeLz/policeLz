@@ -10,45 +10,26 @@
                 <el-row>
                   <el-col :span="24">
                     <el-menu
-                        default-active="2"
                         class="el-menu-vertical-demo"
-                        @open="handleOpen"
-                        @close="handleClose">
-                        <el-submenu index="1">
+                        :router=true>
+                        <el-submenu v-for="(item) in menus" :index="item.url" :key="item.id">
                             <template slot="title">
-                                <i class="el-icon-location"></i>
-                                <span>导航一</span>
+                                <i :class="item.icon"></i>
+                                <span>{{item.name}}</span>
                             </template>
-                            <el-menu-item-group>
-                                <template slot="title">分组一</template>
-                                <el-menu-item index="1-1">选项1</el-menu-item>
-                                <el-menu-item index="1-2">选项2</el-menu-item>
-                            </el-menu-item-group>
-                            <el-menu-item-group title="分组2">
-                            <el-menu-item index="1-3">选项3</el-menu-item>
-                            </el-menu-item-group>
-                            <el-submenu index="1-4">
-                                <template slot="title">选项4</template>
-                                <el-menu-item index="1-4-1">选项1</el-menu-item>
-                            </el-submenu>
+                            <el-menu-item style="padding-left:48px" :index="item2.url" v-for="item2 in item.children" :key="item2.id">{{item2.name}}</el-menu-item>
                         </el-submenu>
-                        <el-menu-item index="2">
-                            <i class="el-icon-menu"></i>
-                            <span slot="title">导航二</span>
-                        </el-menu-item>
-                        <el-menu-item index="3" disabled>
-                            <i class="el-icon-document"></i>
-                            <span slot="title">导航三</span>
-                        </el-menu-item>
-                        <el-menu-item index="4">
-                            <i class="el-icon-setting"></i>
-                            <span slot="title">导航四</span>
-                        </el-menu-item>
                     </el-menu>
                   </el-col>
                 </el-row>
             </el-aside>
             <el-main>
+                <div class="main">
+                    <router-view></router-view>
+                </div>
+                <div class="footer">
+                    2020&nbsp;©&nbsp;大数据情报指挥综合赋能服务平台
+                </div>
             </el-main>
         </el-container>
     </el-container>
@@ -62,7 +43,29 @@ export default {
   },
   data () {
     return {
-
+      menus: [{
+        id: 1,
+        name: '系统管理',
+        icon: 'el-icon-s-tools',
+        url: '/manager/system/user',
+        children: [
+          { 
+            id: 11,
+            name: '用户管理',
+            url: '/manager/system/user'
+          },
+          { 
+            id: 12,
+            name: '角色管理',
+            url: '/manager/system/role'
+          },
+          { 
+            id: 13,
+            name: '权限管理',
+            url: '/manager/system/authority'
+          }
+        ]
+      }]
     }
   },
   computed: {
@@ -78,14 +81,6 @@ export default {
 
   },
   methods: {
-    // 菜单打开事件
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath)
-    },
-    // 菜单关闭事件
-    handleClose(key, keyPath) {
-      console.log(key, keyPath)
-    }
   },
   components: {
 
@@ -97,6 +92,12 @@ export default {
 *
     margin 0
     padding 0
+::-webkit-scrollbar 
+  width 10px
+  height 10px
+::-webkit-scrollbar-thumb 
+  background-color #a1a3a9
+  border-radius 3px
 #managerIndex
     width 100%
     height 100vh
@@ -113,9 +114,21 @@ export default {
     .el-aside 
         background-color white
         color #333
+        border-right 1px solid rgba(0, 0, 0, 0.05)
     .el-main 
         background-color #E9EEF3
         color #333
         height 100%
         overflow-y auto
+        .main
+            padding 20px 5px 15px 5px
+        .footer
+            background #f9f9f9
+            border-top 1px solid rgba(0, 0, 0, 0.05)
+            padding 20px 30px
+            color #58666e
+            position absolute
+            right 0px
+            left 240px
+            bottom 0px
 </style>

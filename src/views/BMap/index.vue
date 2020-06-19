@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- <topNav class="topNav"></topNav> -->
+    <topNav class="topNav"></topNav>
     <BMap class="bmap"></BMap>
   </div>
 </template>
@@ -12,13 +12,13 @@ import BMap from '../../components/BMap/BMap'
 export default {
   name: 'Main',
   components: {
-    // topNav,
+    topNav,
     BMap
   }
 }
 </script>
 
-<style scoped>
+<style>
 
 .topNav{
   height:80px;

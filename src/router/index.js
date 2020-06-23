@@ -17,6 +17,41 @@ export default new Router({
             component: () =>
                 import ('@/views/BMap/index.vue')
         },
+        // 登录
+        {
+            path: '/login',
+            name: 'login',
+            component: () =>
+                import ('@/views/login.vue')
+        },
+        // 注册
+        {
+            path: '/register',
+            name: 'register',
+            component: () =>
+                import ('@/views/register.vue')
+        },
+        // 手机验证
+        {
+            path: '/phoneVerification',
+            name: 'phoneVerification',
+            component: () =>
+                import ('@/views/phoneVerification.vue')
+        },
+        // 验证码登录
+        {
+            path: '/verification',
+            name: 'verification',
+            component: () =>
+                import ('@/views/verification.vue')
+        },
+        // 人脸识别登录
+        {
+            path: '/faceRfecognition',
+            name: 'faceRfecognition',
+            component: () =>
+                import ('@/views/faceRfecognition.vue')
+        },
         // 管理系统首页
         {
             path: '/manager',

@@ -115,6 +115,8 @@ export default {
         background-color white
         color #333
         border-right 1px solid rgba(0, 0, 0, 0.05)
+        .el-menu
+          border 0px
     .el-main 
         background-color #E9EEF3
         color #333

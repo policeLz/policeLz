@@ -11,16 +11,8 @@ module.exports = {
     lintOnSave: true,
     runtimeCompiler: false,
     productionSourceMap: false,
-    // externals:{
-    //     BMap:"BMap"
-    // },
     css: {
         sourceMap: true,
-        // loaderOptions: {
-        //     sass: {
-        //         prependData: ` @import "@/assets/styles/variable.scss";`
-        //     }
-        // }
     },
     configureWebpack: config => {
         config.resolve = {
@@ -33,8 +25,13 @@ module.exports = {
             }
         }
     },
-
-
-
-
+    devServer: {
+        proxy: 'http://localhost:8080',
+        public: 'localhost:8080'  // 本地ip
+    }
+    // devServer: {
+    //     host: '0.0.0.0',
+    //     port: 8080,
+    //     https: true,
+    // }
 }

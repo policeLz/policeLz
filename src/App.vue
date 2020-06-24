@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" >
     <router-view></router-view>
   </div>
 </template>
@@ -20,7 +20,5 @@ export default {
   color: #2c3e50;
   height:100vh
 }
-.topNav{
-  height:80px;
-}
+ul,li{ padding:0;margin:0;list-style:none}
 </style>

@@ -26,12 +26,8 @@ module.exports = {
         }
     },
     devServer: {
-        proxy: 'http://localhost:8080',
-        public: 'localhost:8080'  // 本地ip
+        host: '0.0.0.0',
+        port: 8080,
+        https: true,
     }
-    // devServer: {
-    //     host: '0.0.0.0',
-    //     port: 8080,
-    //     https: true,
-    // }
 }

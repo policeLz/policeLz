@@ -34,14 +34,14 @@ export const BMapMixin = {
             //获取两点间距离
             let _this = this, map = _this.myBMap;
             _this.addOverlay(pointA, pointB,function(){
-            
                 //callback(distance)
             })
             map.centerAndZoom(new BMap.Point(pointA.lng, pointA.lat), 14)
             var pointA = new BMap.Point(pointA.lng, pointA.lat);
             var pointB = new BMap.Point(pointB.lng, pointB.lat);
-            alert('距离是：' + (map.getDistance(pointA, pointB)).toFixed(2) + ' 米。');  //获取两点距离,保留小数点后两位
             var distance = map.getDistance(pointA, pointB).toFixed(2)
+            alert('距离是：' + distance + ' 米。');  //获取两点距离,保留小数点后两位
+            
         },
         //地图切换主题
         changeTheme(type='normal'){
@@ -58,17 +58,15 @@ export const BMapMixin = {
             var pointB = new BMap.Point(pointB.lng, pointB.lat);
             var polyline = new BMap.Polyline([pointA, pointB], { strokeColor: "blue", strokeWeight: 6, strokeOpacity: 0.5 });  //定义折线
             map.addOverlay(polyline);     //添加折线到地图上
-            _this.overlays.push(polyline)
+            if(!_this.overlays['line']){//添加line图层
+                _this.overlays['line']={
+                    marker:[]
+                }
+            }
+            _this.overlays['line']['marker'].push(polyline)
             callback()
         },
-        clearAll() {//清除绘制的痕迹
-            let _this = this, map = _this.myBMap;
-            // for (var i = 0; i < _this.overlays.length; i++) {
-            //     map.removeOverlay(_this.overlays[i]);
-            // }
-            // _this.overlays.length = 0
-            map.clearOverlays()
-        },
+        
         //画线
         drawLine() {
             this.drawGraphical('POLYLINE', function (path) {
@@ -76,7 +74,7 @@ export const BMapMixin = {
                 let pathArr = [];
                 path.forEach(item => {
                     pathArr.push(
-                        [item.lat, item.lng]
+                        [item.lng, item.lat]
                     )
                 })
                 alert(JSON.stringify(pathArr))
@@ -133,7 +131,12 @@ export const BMapMixin = {
                     drawingManager.close()
                     callback(e.overlay.point)
                 } else if (type == "CIRCLE") {
-                    console.log(e.overlay.getCenter())
+                    if(!_this.overlays['circle']){//添加circle图层
+                        _this.overlays['circle']={
+                            marker:[]
+                        }
+                    }
+                    _this.overlays['circle']['marker'].push(e.overlay)
                     callback(e.overlay.getRadius(), e.overlay.getCenter())
                 } else {
                     var drawPath = e.overlay.getPath();
@@ -169,35 +172,59 @@ export const BMapMixin = {
             drawingManager.open()
         },
         //标记点  并弹框  警情上图
-        drawMarker(lng, lat) {
+        drawMarker(caseItem) {
             let _this = this, map = _this.myBMap;
-            var pt = new BMap.Point(lng, lat);
-            var myIcon = new BMap.Icon(require("../../../assets/image/logo.png"), new BMap.Size(44, 46));
+            var pt = new BMap.Point(caseItem.lng, caseItem.lat);
+            var myIcon = new BMap.Icon(require("@/assets/image/1_1_normal.png"), new BMap.Size(44, 46));
             var marker = new BMap.Marker(pt, { icon: myIcon });  // 创建标注
             map.addOverlay(marker);              // 将标注添加到地图中
-            map.centerAndZoom(new BMap.Point(lng, lat), 14)
-            _this.overlays.push(marker)
-            var sContent =
-                "<h4 style='margin:0 0 5px 0;padding:0.2em 0'>无锡市公安局</h4>" +
-                `<img style='float:right;margin:4px' id='imgDemo' src='${require("../../../assets/image/logo.png")}' width='100' height='104' title='天安门'/>` +
-                "<p style='margin:0;line-height:1.5;font-size:13px;text-indent:2em'>无锡市公安局测试警情</p>" +
-                "</div>";
-            var infoWindow = new BMap.InfoWindow(sContent);  // 创建信息窗口对象
-            marker.addEventListener("click", function () {
-
-                map.panTo(pt);
-                this.openInfoWindow(infoWindow);
-                //图片加载完毕重绘infowindow
-                document.getElementById('imgDemo').onload = function () {
-                    infoWindow.redraw();   //防止在网速较慢，图片未加载时，生成的信息框高度比图片的总高度小，导致图片部分被隐藏
+            map.centerAndZoom(new BMap.Point(caseItem.lng, caseItem.lat), 14)
+            if(_this.overlays['caseMarker']){
+                _this.clearMarker('caseMarker',function(){
+                    _this.overlays['caseMarker']['marker'].push(marker)
+                })
+            }else{
+                _this.overlays['caseMarker'] = {
+                    marker:[]
                 }
+                _this.overlays['caseMarker']['marker'].push(marker)
+            }
+            var sContent =`
+                <ul class="left">
+                    <li title="报警录音"></li>
+                    <li title="周边资源"></li>
+                    <li title="视频监控"></li>
+                </ul>
+                <ul class="right">
+                    <li title="报警录音"></li>
+                    <li title="周边资源"></li>
+                    <li title="视频监控"></li>
+                </ul>    
+            `
+            //var infoWindow = new BMap.InfoWindow(sContent);  // 创建信息窗口对象
+            var infoBox = new BMapLib.InfoBox(map, sContent, {
+                boxClass: 'caseBox',
+                offset: new BMap.Size(140, -100),
+                closeIconMargin: '10px 10px 0 0',
+                closeIconUrl: require("@/assets/image/11.png"),
+                enableAutoPan: true
+            });
+            marker.addEventListener("click", function () {
+                map.panTo(pt);
+                //this.openInfoWindow(infoWindow);
+                infoBox.open(marker);
+                //图片加载完毕重绘infowindow
+                // document.getElementById('imgDemo').onload = function () {
+                //     infoWindow.redraw();   //防止在网速较慢，图片未加载时，生成的信息框高度比图片的总高度小，导致图片部分被隐藏
+                // }
+                _this.$emit('showCaseInfo')
             });
         },
         moveByLine: function () {//沿线运动
             let _this = this, map = _this.myBMap;
             var myP1 = new BMap.Point(120.3054566, 31.570037);    //起点
             var myP2 = new BMap.Point(120.3154566, 31.570037);    //终点
-            var myIcon = new BMap.Icon(require("../../../assets/image/logo.png"), new BMap.Size(48, 46), {    //小车图片
+            var myIcon = new BMap.Icon(require("@/assets/image/logo.png"), new BMap.Size(48, 46), {    //小车图片
                 //offset: new BMap.Size(0, -5),    //相当于CSS精灵
                 imageOffset: new BMap.Size(0, 0)    //图片的偏移量。为了是图片底部中心对准坐标点。
             });
@@ -397,6 +424,21 @@ export const BMapMixin = {
                 var elem = document.createElement('canvas');
                 return !!(elem.getContext && elem.getContext('2d'));
             }
+        },
+        //清除绘制的痕迹
+        clearAll() {
+            let _this = this, map = _this.myBMap;
+            map.clearOverlays()
+        },
+        //清除单个图层
+        clearMarker(type,callback){
+            let _this = this, map = _this.myBMap;
+            console.log(_this.overlays[type]['marker'])
+            for (let i = 0; i < _this.overlays[type]['marker'].length; i++) {
+                map.removeOverlay(_this.overlays[type]['marker'][i]);
+            }
+            _this.overlays[type]['marker'].length = 0
+            callback();
         },
 
     },

@@ -11,16 +11,8 @@ module.exports = {
     lintOnSave: true,
     runtimeCompiler: false,
     productionSourceMap: false,
-    // externals:{
-    //     BMap:"BMap"
-    // },
     css: {
         sourceMap: true,
-        // loaderOptions: {
-        //     sass: {
-        //         prependData: ` @import "@/assets/styles/variable.scss";`
-        //     }
-        // }
     },
     configureWebpack: config => {
         config.resolve = {
@@ -34,8 +26,8 @@ module.exports = {
         }
     },
     devServer: {
+        host: '0.0.0.0',
+        port: 8080,
         https: true,
-        host: "0.0.0.0",
-        port: 8080
     }
 }
